@@ -49,7 +49,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             AuthUI.getInstance().
                                     createSignInIntentBuilder().
                                     setAvailableProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                            // new AuthUI.IdpConfig.GoogleBuilder().build(),
                                             new AuthUI.IdpConfig.EmailBuilder().build()
                                     )).
                                     setIsSmartLockEnabled(!BuildConfig.DEBUG /* credentials */, true /* hints */).
