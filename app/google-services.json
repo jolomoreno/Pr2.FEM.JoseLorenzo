@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "541580794042",
-    "firebase_url": "https://fir-login-1b8e7.firebaseio.com",
-    "project_id": "fir-login-1b8e7",
-    "storage_bucket": "fir-login-1b8e7.appspot.com"
+    "project_number": "286936746276",
+    "firebase_url": "https://pr2-fem-joselorenzo-9e5ea.firebaseio.com",
+    "project_id": "pr2-fem-joselorenzo-9e5ea",
+    "storage_bucket": "pr2-fem-joselorenzo-9e5ea.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:541580794042:android:85cab9080d9255f6",
+        "mobilesdk_app_id": "1:286936746276:android:85cab9080d9255f6",
         "android_client_info": {
           "package_name": "es.upm.miw.firebaselogin"
         }
       },
       "oauth_client": [
         {
-          "client_id": "541580794042-l27vcbuqighi92868skvf2kusnp6qe7o.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "es.upm.miw.firebaselogin",
-            "certificate_hash": "3f6f4497b2cfda665f2dae3279e4622b36c8c9a7"
-          }
-        },
-        {
-          "client_id": "541580794042-pka8fr1ikcp89nm9artcr4c2c0kp02uv.apps.googleusercontent.com",
+          "client_id": "286936746276-fku7elbvr350f9i0v9k4hah9vbf43lq8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCWfJjHJ4CBzcO11_f6a2VGGwR46r7iGzY"
+          "current_key": "AIzaSyAVFmGIlSwjGqG_Lt0XfnCDm3-491jLmT8"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "541580794042-pka8fr1ikcp89nm9artcr4c2c0kp02uv.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
