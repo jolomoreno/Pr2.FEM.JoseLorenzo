@@ -5,15 +5,17 @@ public class Reparto {
     private String repartidor;
     private String producto;
     private String incidencia;
+    private String uriImagen;
 
     public Reparto() {
     }
 
-    public Reparto(String fechaEntrega, String repartidor, String producto, String incidencia) {
+    public Reparto(String fechaEntrega, String repartidor, String producto, String incidencia, String uriImagen) {
         this.fechaEntrega = fechaEntrega;
         this.repartidor = repartidor;
         this.producto = producto;
         this.incidencia = incidencia;
+        this.uriImagen = uriImagen;
     }
 
     @Override
@@ -23,6 +25,7 @@ public class Reparto {
                 ", repartidor='" + repartidor + '\'' +
                 ", producto='" + producto + '\'' +
                 ", incidencia='" + incidencia + '\'' +
+                ", uriImagen='" + uriImagen + '\'' +
                 '}';
     }
 
@@ -56,6 +59,14 @@ public class Reparto {
 
     public void setIncidencia(String incidencia) {
         this.incidencia = incidencia;
+    }
+
+    public String getUriImagen() {
+        return uriImagen;
+    }
+
+    public void setUriImagen(String uriImagen) {
+        this.uriImagen = uriImagen;
     }
 
     /*

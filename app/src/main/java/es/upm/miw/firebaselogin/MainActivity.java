@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 // Firebase
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -52,6 +54,7 @@ public class MainActivity extends Activity {
     private ImageButton mInfoPropiaButton;
     private EditText mProductoEditText;
     private EditText mIncidenciasEditText;
+    private Uri uri;
 
 
     @Override
@@ -75,17 +78,32 @@ public class MainActivity extends Activity {
         mFirebaseStorage = FirebaseStorage.getInstance();
         mRefFirebaseStorage = mFirebaseStorage.getReference();
 
-        // Environment.getExternalStorageDirectory().getPath("")
+        // GET DATA de la IMAGEN
         Uri file = Uri.fromFile(new File( "data/data/es.upm.miw.firebaselogin/files/ironmanProfile.png"));
         final StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/img_"+obtenerFecha()+".png");
 
         UploadTask resultado = incidenciaRef.putFile(file);
 
-        resultado.addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        Task<Uri> urlTask = resultado.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Task downloadUrl = incidenciaRef.getDownloadUrl();
-                Log.i(LOG_TAG, "downloadUrl " + downloadUrl.toString());
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return incidenciaRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    uri = task.getResult();
+                    Log.i(LOG_TAG, "EXITO: " + uri.toString());
+                } else {
+                    // Handle failures
+                    Log.i(LOG_TAG, "FRACASO ");
+                }
             }
         });
 
@@ -123,7 +141,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 String usuarioLogado  = mFirebaseAuth.getCurrentUser().getEmail();
                 Log.i(LOG_TAG, "Se quiere registrar un reparto");
-                Reparto reparto = new Reparto(obtenerFecha(), usuarioLogado, mProductoEditText.getText().toString(), mIncidenciasEditText.getText().toString());
+                Reparto reparto = new Reparto(obtenerFecha(), usuarioLogado, mProductoEditText.getText().toString(), mIncidenciasEditText.getText().toString(), uri.toString());
 
                 if(reparto.getProducto().isEmpty()){
                     Toast.makeText(MainActivity.this, getString(R.string.producto_empty_text), Toast.LENGTH_LONG).show();
