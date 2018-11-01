@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +19,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 public class MainActivity extends Activity {
 
@@ -30,6 +35,11 @@ public class MainActivity extends Activity {
     private static final int RC_SIGN_IN = 2018;
     private Button mLogoutButton;
     private Button mPostRepartoButton;
+    private Button mListRepartoButton;
+    private ImageButton mInfoPropiaButton;
+    private EditText mProductoEditText;
+    private EditText mIncidenciasEditText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +47,17 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         mLogoutButton = findViewById(R.id.logoutButton);
         mPostRepartoButton = (Button)findViewById(R.id.postReparto);
+        mListRepartoButton = (Button)findViewById(R.id.listaReparto);
+        mInfoPropiaButton = findViewById(R.id.infoPropiaButton);
+        mProductoEditText = (EditText) findViewById(R.id.productoEditText);
+        mIncidenciasEditText = (EditText) findViewById(R.id.incidenciaEditText);
+        mProductoEditText.setText("");
+        mIncidenciasEditText.setText("");
 
         // Connect to the database service - FIREBASE
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mRefFirebaseDatabase = mFirebaseDatabase.getReference("reparto");
-        // Connect to the auth servic - FIREBASE
+        // Connect to the auth service - FIREBASE
         mFirebaseAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -49,10 +65,9 @@ public class MainActivity extends Activity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // user is signed in
-                    CharSequence username = user.getDisplayName();
-                    Toast.makeText(MainActivity.this, getString(R.string.firebase_user_fmt, username), Toast.LENGTH_LONG).show();
-                    Log.i(LOG_TAG, "onAuthStateChanged() " + getString(R.string.firebase_user_fmt, username));
-                    ((TextView) findViewById(R.id.textView)).setText(getString(R.string.firebase_user_fmt, username));
+                    String username = user.getDisplayName();
+                    Log.i(LOG_TAG, "onAuthStateChanged(): " + username);
+                    ((TextView) findViewById(R.id.textView)).setText(username);
                 } else {
                     // user is signed out
                     startActivityForResult(
@@ -74,18 +89,47 @@ public class MainActivity extends Activity {
         mPostRepartoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String usuarioLogado  = mFirebaseAuth.getCurrentUser().getEmail();
                 Log.i(LOG_TAG, "Se quiere registrar un reparto");
-                Reparto reparto = new Reparto("10:23 10-10-2018", "LOGGED USER", "Teclado inalambrico", "Todo correcto");
-                mRefFirebaseDatabase.push().setValue(reparto);
-                Log.i(LOG_TAG, "Se registra un reparto");
+                Reparto reparto = new Reparto(obtenerFecha(), usuarioLogado, mProductoEditText.getText().toString(), mIncidenciasEditText.getText().toString());
+
+                if(reparto.getProducto().isEmpty()){
+                    Toast.makeText(MainActivity.this, getString(R.string.producto_empty_text), Toast.LENGTH_LONG).show();
+                }else{
+                    mRefFirebaseDatabase.push().setValue(reparto);
+                    Log.i(LOG_TAG, "Se ha registrado un reparto: " + reparto);
+                    mProductoEditText.setText("");
+                    mIncidenciasEditText.setText("");
+                    Toast.makeText(MainActivity.this, getString(R.string.post_reparto_text), Toast.LENGTH_LONG).show();
+                }
             }
         });
 
+        // Logout button sign out logged user
         mLogoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mFirebaseAuth.signOut();
                 Log.i(LOG_TAG, getString(R.string.signed_out));
+            }
+        });
+
+        // ListaReparto button redirects to another activity that shows a list of to-do things
+        mListRepartoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, getString(R.string.get_reparto_text));
+                Toast.makeText(MainActivity.this, getString(R.string.get_reparto_text), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // InfoPropia button redirects to another activity that shows the logged user's information
+        mInfoPropiaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String usuarioLogado  = mFirebaseAuth.getCurrentUser().get;
+                Log.i(LOG_TAG, getString(R.string.logged_user_info_text) +": " + usuarioLogado);
+                Toast.makeText(MainActivity.this, getString(R.string.logged_user_info_text), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -116,5 +160,13 @@ public class MainActivity extends Activity {
                 finish();
             }
         }
+    }
+
+    public String obtenerFecha(){
+        Date fechaActual = new Date();
+        //Formateando la fecha:
+        DateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+        DateFormat formatoFecha = new SimpleDateFormat("dd-MM-yyyy");
+        return (formatoHora.format(fechaActual)+" "+formatoFecha.format(fechaActual));
     }
 }

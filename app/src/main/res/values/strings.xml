@@ -5,12 +5,20 @@
     <string name="signed_out">Signed out!</string>
     <string name="signed_cancelled">Signed in cancelled</string>
     <string name="logout_button">Logout</string>
-    <string name="firebase_user_fmt">Usuario: %s</string>
 
-    <!-- Guardar entrega-->
+    <!-- Guardar entrega -->
     <string name="producto_text">Producto</string>
     <string name="producto_edit_text">Inserte producto</string>
+    <string name="producto_empty_text">Error: Inserte un producto</string>
     <string name="incidencias_text">Incidencias</string>
     <string name="incidencias_edit_text">Inserte incidencias</string>
     <string name="post_reparto_button">Guardar</string>
+    <string name="post_reparto_text">Se ha registrado el reparto</string>
+
+    <!-- Lista de reparto -->
+    <string name="get_reparto_button">Repartos pendientes</string>
+    <string name="get_reparto_text">Lista de repartos pendientes</string>
+
+    <!-- Info usuario logado -->
+    <string name="logged_user_info_text">Informacion del usuario logado</string>
 </resources>
