@@ -2,7 +2,9 @@ package es.upm.miw.firebaselogin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -14,11 +16,17 @@ import android.widget.Toast;
 
 // Firebase
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -33,6 +41,8 @@ public class MainActivity extends Activity {
     private FirebaseAuth mFirebaseAuth;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mRefFirebaseDatabase;
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mRefFirebaseStorage;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     private static final int RC_SIGN_IN = 2018;
     private Button mLogoutButton;
@@ -59,6 +69,25 @@ public class MainActivity extends Activity {
         // Connect to the database service - FIREBASE
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mRefFirebaseDatabase = mFirebaseDatabase.getReference("reparto");
+
+        // Connect to the storage service - FIREBASE
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mRefFirebaseStorage = mFirebaseStorage.getReference();
+
+        // Environment.getExternalStorageDirectory().getPath("")
+        String sdDir = Environment.getExternalStorageDirectory().getPath();
+        Log.i(LOG_TAG, "sdDir " + sdDir);
+        Uri file = Uri.fromFile(new File( "data/data/es.upm.miw.firebaselogin/files/ironmanProfile.png"));
+        StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/imagenprueba.jpg");
+
+
+        Log.i(LOG_TAG, "mFirebaseStorage " + mFirebaseStorage);
+        Log.i(LOG_TAG, "mRefFirebaseStorage " + mRefFirebaseStorage);
+        Log.i(LOG_TAG, "file " + file);
+        Log.i(LOG_TAG, "incidenciaRef " + incidenciaRef);
+
+        UploadTask resultado = incidenciaRef.putFile(file);
+
         // Connect to the auth service - FIREBASE
         mFirebaseAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -68,7 +97,7 @@ public class MainActivity extends Activity {
                 if (user != null) {
                     // user is signed in
                     String username = user.getDisplayName();
-                    Log.i(LOG_TAG, "onAuthStateChanged(): " + username);
+                    // Log.i(LOG_TAG, "onAuthStateChanged(): " + username);
                     ((TextView) findViewById(R.id.textView)).setText(username);
                 } else {
                     // user is signed out
