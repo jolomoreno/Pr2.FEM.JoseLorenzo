@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
@@ -31,6 +33,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         findViewById(R.id.logoutButton).setOnClickListener(this);
 
+        // Write a message to the database
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference myRef = database.getReference("reparto");
+
         mFirebaseAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -42,6 +48,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(MainActivity.this, getString(R.string.firebase_user_fmt, username), Toast.LENGTH_LONG).show();
                     Log.i(LOG_TAG, "onAuthStateChanged() " + getString(R.string.firebase_user_fmt, username));
                     ((TextView) findViewById(R.id.textView)).setText(getString(R.string.firebase_user_fmt, username));
+
+                    Reparto reparto = new Reparto("10:23 10-10-2018", username.toString(), "Teclado inalambrico", "Todo correcto");
+                    myRef.push().setValue(reparto);
+
                 } else {
                     // user is signed out
                     startActivityForResult(
