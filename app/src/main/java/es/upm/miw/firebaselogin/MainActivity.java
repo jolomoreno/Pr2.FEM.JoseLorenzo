@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,25 +19,29 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity {
 
     final static String LOG_TAG = "MiW";
 
     private FirebaseAuth mFirebaseAuth;
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mRefFirebaseDatabase;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
-
     private static final int RC_SIGN_IN = 2018;
+    private Button mLogoutButton;
+    private Button mPostRepartoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.logoutButton).setOnClickListener(this);
+        mLogoutButton = findViewById(R.id.logoutButton);
+        mPostRepartoButton = (Button)findViewById(R.id.postReparto);
 
-        // Write a message to the database
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference myRef = database.getReference("reparto");
-
+        // Connect to the database service - FIREBASE
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mRefFirebaseDatabase = mFirebaseDatabase.getReference("reparto");
+        // Connect to the auth servic - FIREBASE
         mFirebaseAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -48,10 +53,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(MainActivity.this, getString(R.string.firebase_user_fmt, username), Toast.LENGTH_LONG).show();
                     Log.i(LOG_TAG, "onAuthStateChanged() " + getString(R.string.firebase_user_fmt, username));
                     ((TextView) findViewById(R.id.textView)).setText(getString(R.string.firebase_user_fmt, username));
-
-                    Reparto reparto = new Reparto("10:23 10-10-2018", username.toString(), "Teclado inalambrico", "Todo correcto");
-                    myRef.push().setValue(reparto);
-
                 } else {
                     // user is signed out
                     startActivityForResult(
@@ -68,6 +69,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         };
+
+        // PostReparto button sends info to the Firebase RealTime DB
+        mPostRepartoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(LOG_TAG, "Se quiere registrar un reparto");
+                Reparto reparto = new Reparto("10:23 10-10-2018", "LOGGED USER", "Teclado inalambrico", "Todo correcto");
+                mRefFirebaseDatabase.push().setValue(reparto);
+                Log.i(LOG_TAG, "Se registra un reparto");
+            }
+        });
+
+        mLogoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mFirebaseAuth.signOut();
+                Log.i(LOG_TAG, getString(R.string.signed_out));
+            }
+        });
     }
 
 
@@ -96,16 +116,5 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 finish();
             }
         }
-    }
-
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        mFirebaseAuth.signOut();
-        Log.i(LOG_TAG, getString(R.string.signed_out));
     }
 }
