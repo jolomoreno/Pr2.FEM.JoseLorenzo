@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -75,18 +76,18 @@ public class MainActivity extends Activity {
         mRefFirebaseStorage = mFirebaseStorage.getReference();
 
         // Environment.getExternalStorageDirectory().getPath("")
-        String sdDir = Environment.getExternalStorageDirectory().getPath();
-        Log.i(LOG_TAG, "sdDir " + sdDir);
         Uri file = Uri.fromFile(new File( "data/data/es.upm.miw.firebaselogin/files/ironmanProfile.png"));
-        StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/imagenprueba.jpg");
-
-
-        Log.i(LOG_TAG, "mFirebaseStorage " + mFirebaseStorage);
-        Log.i(LOG_TAG, "mRefFirebaseStorage " + mRefFirebaseStorage);
-        Log.i(LOG_TAG, "file " + file);
-        Log.i(LOG_TAG, "incidenciaRef " + incidenciaRef);
+        final StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/img_"+obtenerFecha()+".png");
 
         UploadTask resultado = incidenciaRef.putFile(file);
+
+        resultado.addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Task downloadUrl = incidenciaRef.getDownloadUrl();
+                Log.i(LOG_TAG, "downloadUrl " + downloadUrl.toString());
+            }
+        });
 
         // Connect to the auth service - FIREBASE
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -201,6 +202,6 @@ public class MainActivity extends Activity {
         //Formateando la fecha:
         DateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
         DateFormat formatoFecha = new SimpleDateFormat("dd-MM-yyyy");
-        return (formatoHora.format(fechaActual)+" "+formatoFecha.format(fechaActual));
+        return (formatoHora.format(fechaActual)+"_"+formatoFecha.format(fechaActual));
     }
 }
