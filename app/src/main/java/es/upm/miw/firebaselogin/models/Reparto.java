@@ -1,7 +1,4 @@
-package es.upm.miw.firebaselogin;
-
-import android.os.Parcel;
-import android.os.Parcelable;
+package es.upm.miw.firebaselogin.models;
 
 public class Reparto {
     private String fechaEntrega;

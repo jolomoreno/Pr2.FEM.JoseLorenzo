@@ -24,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+import es.upm.miw.firebaselogin.models.Reparto;
+
 public class MainActivity extends Activity {
 
     final static String LOG_TAG = "MiW";
@@ -127,9 +129,12 @@ public class MainActivity extends Activity {
         mInfoPropiaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String usuarioLogado  = mFirebaseAuth.getCurrentUser().get;
-                Log.i(LOG_TAG, getString(R.string.logged_user_info_text) +": " + usuarioLogado);
+                String emailUsuarioLogado  = mFirebaseAuth.getCurrentUser().getEmail();
+                String nombreUsuarioLogado  = mFirebaseAuth.getCurrentUser().getDisplayName();
+                Log.i(LOG_TAG, getString(R.string.logged_user_info_text) +"-> Nombre: " + nombreUsuarioLogado + ", Email: " + emailUsuarioLogado);
                 Toast.makeText(MainActivity.this, getString(R.string.logged_user_info_text), Toast.LENGTH_LONG).show();
+                Intent profileActivity = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(profileActivity);
             }
         });
     }

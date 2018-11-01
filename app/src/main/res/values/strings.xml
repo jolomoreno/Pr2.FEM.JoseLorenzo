@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Pr2.FEM.JoseLorenzo</string>
+    <string name="user_profile">Información del usuario</string>
 
     <string name="signed_in">Signed in!</string>
     <string name="signed_out">Signed out!</string>
+    <string name="user_name_text"></string>
     <string name="signed_cancelled">Signed in cancelled</string>
     <string name="logout_button">Logout</string>
 
@@ -21,4 +23,17 @@
 
     <!-- Info usuario logado -->
     <string name="logged_user_info_text">Informacion del usuario logado</string>
+    <string name="user_name_label">Usuario</string>
+    <string name="user_email_label">Email</string>
+    <string name="user_email_text"></string>
+    <string name="user_phone_label">Telefono</string>
+    <string name="user_phone_text"></string>
+    <string name="user_company_label">Compañía</string>
+    <string name="user_company_text"></string>
+    <string name="user_address_label">Dirección</string>
+    <string name="user_street_text"></string>
+    <string name="user_suite_text"></string>
+    <string name="user_city_text"></string>
+    <string name="user_zipcode_text"></string>
+    <string name="strError">No se ha recuperado ningún usuario</string>
 </resources>
