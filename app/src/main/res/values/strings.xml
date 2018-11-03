@@ -4,6 +4,7 @@
 
     <string name="signed_in">Signed in!</string>
     <string name="signed_out">Signed out!</string>
+    <string name="get_reparto_text">Registro de repartos</string>
     <string name="user_name_text"></string>
     <string name="signed_cancelled">Signed in cancelled</string>
     <string name="logout_button">Logout</string>
@@ -16,10 +17,6 @@
     <string name="incidencias_edit_text">Inserte incidencias</string>
     <string name="post_reparto_button">Guardar</string>
     <string name="post_reparto_text">Se ha registrado el reparto</string>
-
-    <!-- Lista de reparto -->
-    <string name="get_reparto_button">Repartos pendientes</string>
-    <string name="get_reparto_text">Lista de repartos pendientes</string>
 
     <!-- Info usuario logado -->
     <string name="logged_user_info_text">Informacion del usuario logado</string>

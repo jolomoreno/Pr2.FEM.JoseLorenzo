@@ -51,7 +51,6 @@ public class MainActivity extends Activity {
     private static final int RC_PHOTO_PICKER = 6666;
     private Button mLogoutButton;
     private Button mPostRepartoButton;
-    private Button mListRepartoButton;
     private ImageButton mInfoPropiaButton;
     private ImageButton mUploadPhotoButton;
     private EditText mProductoEditText;
@@ -65,7 +64,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         mLogoutButton = findViewById(R.id.logoutButton);
         mPostRepartoButton = (Button)findViewById(R.id.postReparto);
-        mListRepartoButton = (Button)findViewById(R.id.listaReparto);
         mInfoPropiaButton = findViewById(R.id.infoPropiaButton);
         mUploadPhotoButton = (ImageButton) findViewById(R.id.imgUpload);
         mProductoEditText = (EditText) findViewById(R.id.productoEditText);
@@ -183,15 +181,6 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 mFirebaseAuth.signOut();
                 Log.i(LOG_TAG, getString(R.string.signed_out));
-            }
-        });
-
-        // ListaReparto button redirects to another activity that shows a list of to-do things
-        mListRepartoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(LOG_TAG, getString(R.string.get_reparto_text));
-                Toast.makeText(MainActivity.this, getString(R.string.get_reparto_text), Toast.LENGTH_LONG).show();
             }
         });
 
