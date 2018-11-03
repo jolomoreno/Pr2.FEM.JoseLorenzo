@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,8 +19,6 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,14 +43,17 @@ public class MainActivity extends Activity {
     private FirebaseAuth mFirebaseAuth;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mRefFirebaseDatabase;
+    private DatabaseReference mRefFirebaseDatabaseUser;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mRefFirebaseStorage;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     private static final int RC_SIGN_IN = 2018;
+    private static final int RC_PHOTO_PICKER = 6666;
     private Button mLogoutButton;
     private Button mPostRepartoButton;
     private Button mListRepartoButton;
     private ImageButton mInfoPropiaButton;
+    private ImageButton mUploadPhotoButton;
     private EditText mProductoEditText;
     private EditText mIncidenciasEditText;
     private Uri uri;
@@ -65,6 +67,7 @@ public class MainActivity extends Activity {
         mPostRepartoButton = (Button)findViewById(R.id.postReparto);
         mListRepartoButton = (Button)findViewById(R.id.listaReparto);
         mInfoPropiaButton = findViewById(R.id.infoPropiaButton);
+        mUploadPhotoButton = (ImageButton) findViewById(R.id.imgUpload);
         mProductoEditText = (EditText) findViewById(R.id.productoEditText);
         mIncidenciasEditText = (EditText) findViewById(R.id.incidenciaEditText);
         mProductoEditText.setText("");
@@ -72,40 +75,13 @@ public class MainActivity extends Activity {
 
         // Connect to the database service - FIREBASE
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mRefFirebaseDatabase = mFirebaseDatabase.getReference("reparto");
-
+        // cambiar a repartos
+        mRefFirebaseDatabase = mFirebaseDatabase.getReference("repartos");
+        // getReference("usersloged")
+        mRefFirebaseDatabaseUser = mFirebaseDatabase.getReference("usuarios_logados");
         // Connect to the storage service - FIREBASE
         mFirebaseStorage = FirebaseStorage.getInstance();
         mRefFirebaseStorage = mFirebaseStorage.getReference();
-
-        // GET DATA de la IMAGEN
-        Uri file = Uri.fromFile(new File( "data/data/es.upm.miw.firebaselogin/files/ironmanProfile.png"));
-        final StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/img_"+obtenerFecha()+".png");
-
-        UploadTask resultado = incidenciaRef.putFile(file);
-
-        Task<Uri> urlTask = resultado.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-
-                // Continue with the task to get the download URL
-                return incidenciaRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    uri = task.getResult();
-                    Log.i(LOG_TAG, "EXITO: " + uri.toString());
-                } else {
-                    // Handle failures
-                    Log.i(LOG_TAG, "FRACASO ");
-                }
-            }
-        });
 
         // Connect to the auth service - FIREBASE
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -115,9 +91,7 @@ public class MainActivity extends Activity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // user is signed in
-                    String username = user.getDisplayName();
-                    // Log.i(LOG_TAG, "onAuthStateChanged(): " + username);
-                    ((TextView) findViewById(R.id.textView)).setText(username);
+                    ((TextView) findViewById(R.id.textView)).setText(user.getDisplayName());
                 } else {
                     // user is signed out
                     startActivityForResult(
@@ -141,16 +115,64 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 String usuarioLogado  = mFirebaseAuth.getCurrentUser().getEmail();
                 Log.i(LOG_TAG, "Se quiere registrar un reparto");
-                Reparto reparto = new Reparto(obtenerFecha(), usuarioLogado, mProductoEditText.getText().toString(), mIncidenciasEditText.getText().toString(), uri.toString());
+                Reparto reparto = new Reparto();
+                reparto.setRepartidor(usuarioLogado);
+                reparto.setFechaEntrega(obtenerFecha());
 
-                if(reparto.getProducto().isEmpty()){
+                if(mProductoEditText.getText().toString().isEmpty()){
+                    Log.i(LOG_TAG, "Error: No existe producto");
                     Toast.makeText(MainActivity.this, getString(R.string.producto_empty_text), Toast.LENGTH_LONG).show();
                 }else{
+                    reparto.setProducto(mProductoEditText.getText().toString());
+
+                    if(mIncidenciasEditText.getText().toString().equals("")) {
+                        reparto.setIncidencia("Sin incidencia");
+                        reparto.setUriImagen("Sin imagen");
+                    }else if(uri == null){
+                            reparto.setUriImagen("Sin imagen");
+                            reparto.setIncidencia(mIncidenciasEditText.getText().toString());
+                        }else {
+                            reparto.setUriImagen(uri.toString());
+                            reparto.setIncidencia(mIncidenciasEditText.getText().toString());
+                        }
+
                     mRefFirebaseDatabase.push().setValue(reparto);
                     Log.i(LOG_TAG, "Se ha registrado un reparto: " + reparto);
                     mProductoEditText.setText("");
                     mIncidenciasEditText.setText("");
                     Toast.makeText(MainActivity.this, getString(R.string.post_reparto_text), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        // Boton subida imagen a Firebase Storage
+        mUploadPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Se quiere subir una imagen a FIREBASE STORAGE");
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                Log.i(LOG_TAG, intent + "intent");
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER );
+            }
+        });
+
+        // Listener para cambio en campo Incidencias. IF NULL mUploadPhotoButton == INVISIBLE, ELSE mUploadPhotoButton == VISIBLE
+        mIncidenciasEditText.addTextChangedListener(new TextWatcher(){
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(mIncidenciasEditText.getText().toString().equals("")){
+                    mUploadPhotoButton.setVisibility(View.INVISIBLE);
+                }else{
+                    mUploadPhotoButton.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -187,6 +209,72 @@ public class MainActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                mFirebaseAuth = FirebaseAuth.getInstance();
+                FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                String username = user.getDisplayName();
+                String useremail = user.getEmail();
+                String fecha = obtenerFecha();
+                DatabaseReference userRefDatabase = mRefFirebaseDatabaseUser.push();
+                userRefDatabase.child("nombre").setValue(username);
+                userRefDatabase.child("email").setValue(useremail);
+                userRefDatabase.child("fecha").setValue(fecha);
+                Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show();
+                Log.i(LOG_TAG, "onActivityResult " + getString(R.string.signed_in));
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, R.string.signed_cancelled, Toast.LENGTH_SHORT).show();
+                Log.i(LOG_TAG, "onActivityResult " + getString(R.string.signed_cancelled));
+                finish();
+            }
+        }else if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
+                Uri selectedImageUri = data.getData();
+                Log.i(LOG_TAG, "selectedImageUri " + selectedImageUri);
+
+                /*
+                // GET DATA de la IMAGEN LOCAL
+                Uri file = Uri.fromFile(new File( "data/data/es.upm.miw.firebaselogin/files/ironmanProfile.png"));
+                */
+
+                final StorageReference incidenciaRef = mRefFirebaseStorage.child("repartos_incidencias/img_"+obtenerFecha()+".png");
+
+                UploadTask resultado = incidenciaRef.putFile(selectedImageUri);
+
+                Task<Uri> urlTask = resultado.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+
+                        // Continue with the task to get the download URL
+                        return incidenciaRef.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            uri = task.getResult();
+                            Log.i(LOG_TAG, "EXITO: " + uri.toString());
+                        } else {
+                            // Handle failures
+                            Log.i(LOG_TAG, "FRACASO ");
+                        }
+                    }
+                });
+        }
+    }
+
+    public String obtenerFecha(){
+        Date fechaActual = new Date();
+        //Formateando la fecha:
+        DateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+        DateFormat formatoFecha = new SimpleDateFormat("dd-MM-yyyy");
+        return (formatoHora.format(fechaActual)+"_"+formatoFecha.format(fechaActual));
+    }
 
     @Override
     protected void onPause() {
@@ -200,26 +288,4 @@ public class MainActivity extends Activity {
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show();
-                Log.i(LOG_TAG, "onActivityResult " + getString(R.string.signed_in));
-            } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(this, R.string.signed_cancelled, Toast.LENGTH_SHORT).show();
-                Log.i(LOG_TAG, "onActivityResult " + getString(R.string.signed_cancelled));
-                finish();
-            }
-        }
-    }
-
-    public String obtenerFecha(){
-        Date fechaActual = new Date();
-        //Formateando la fecha:
-        DateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
-        DateFormat formatoFecha = new SimpleDateFormat("dd-MM-yyyy");
-        return (formatoHora.format(fechaActual)+"_"+formatoFecha.format(fechaActual));
-    }
 }

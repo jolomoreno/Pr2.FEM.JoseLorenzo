@@ -9,7 +9,7 @@
     <string name="logout_button">Logout</string>
 
     <!-- Guardar entrega -->
-    <string name="producto_text">Producto</string>
+    <string name="producto_text">Ref. producto</string>
     <string name="producto_edit_text">Inserte producto</string>
     <string name="producto_empty_text">Error: Inserte un producto</string>
     <string name="incidencias_text">Incidencias</string>

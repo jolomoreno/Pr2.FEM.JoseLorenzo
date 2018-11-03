@@ -10,14 +10,6 @@ public class Reparto {
     public Reparto() {
     }
 
-    public Reparto(String fechaEntrega, String repartidor, String producto, String incidencia, String uriImagen) {
-        this.fechaEntrega = fechaEntrega;
-        this.repartidor = repartidor;
-        this.producto = producto;
-        this.incidencia = incidencia;
-        this.uriImagen = uriImagen;
-    }
-
     @Override
     public String toString() {
         return "Reparto{" +
